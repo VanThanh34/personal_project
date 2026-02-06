@@ -57,6 +57,7 @@ project-root
 │   ├── service         # Xử lý Logic nghiệp vụ (Secure Token, Async tasks)
 │   ├── repository      # JPA Repository & Specification Queries
 │   └── entity          # Các thực thể DB (User, Game, Category, DownloadToken...)
+│   └── exception       # Xử lý các ngoại lệ
 │
 └── frontend (ReactJS)
     ├── src/api         # Axios Client & Interceptors (Xử lý Token tự động)
