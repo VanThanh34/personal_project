@@ -1,396 +1,74 @@
-🎮 Game Download Platform – Backend
+🎮 Game Download PlatformMột hệ thống phân phối game trực tuyến Full-stack hiệu năng cao, bảo mật và cập nhật theo thời gian thực.Dự án cung cấp giải pháp toàn diện cho việc quản lý, tìm kiếm và tải xuống trò chơi với cơ chế bảo vệ link tải (Anti-leeching) và Dashboard quản trị trực quan.
+🛠 Công Nghệ Sử Dụng (Tech Stack)
+Backend: Spring Security (JWT), Spring Data JPA (Specification), WebSocket (STOMP), Flyway.
+Frontend: Axios Interceptor, React Router, SockJS (Real-time).
+Database: Thiết kế tối ưu quan hệ, Quản lý version bằng Flyway.
+Tools: Postman, IntelliJ IDEA, VS Code.
+🚀 Tính Năng Nổi Bật (Key Features)
+1. 🛡️ Cơ Chế Tải Xuống Bảo Mật (Secure One-time Token)
+Anti-leeching: Sử dụng Token dùng 1 lần (One-time use) để ngăn chặn việc chia sẻ link tải trái phép.
 
+Rate Limiting: Giới hạn tần suất tải (ví dụ: 10 phút/lần) để chống spam.
 
+Smart Delivery: Hỗ trợ cả file lưu trữ cục bộ (Local Storage) và chuyển hướng bảo mật (Redirect) cho Cloud Storage (Google Drive, Fshare...).
 
-Backend cho nền tảng tải game, quản lý game – category – user – thống kê, xây dựng bằng Spring Boot theo hướng REST API, phục vụ cho frontend sau này (React).
+2. ⚡ Dashboard Admin Real-time
+WebSocket Integration: Tích hợp STOMP/SockJS để cập nhật số liệu (Lượt xem, Lượt tải) ngay lập tức mà không cần reload trang.
 
+Statistics: Thống kê trực quan về hiệu suất game, người dùng và danh mục.
 
+3. 🔍 Tìm Kiếm & Phân Loại Nâng Cao
+Sử dụng Spring Data JPA Specification để xây dựng bộ lọc động (Dynamic Filtering).
 
-🚀 Mục tiêu dự án
+Hỗ trợ tìm kiếm kết hợp nhiều điều kiện: Từ khóa, Danh mục, Trạng thái, Sắp xếp (Sort & Pagination).
 
+4. 🔐 Phân Quyền & Bảo Mật (RBAC)
+JWT Authentication: Cơ chế đăng nhập không trạng thái (Stateless).
 
+Phân quyền chặt chẽ:
 
-Xây dựng backend hoàn chỉnh cho website tải game
+User: Xem game, tìm kiếm, tải game (có bảo mật), xem lịch sử tải.
 
+Admin: CRUD Game/User/Category, xem Dashboard thống kê, quản lý file.
 
+📁 Cấu Trúc Dự Án
+Hệ thống được tổ chức theo kiến trúc Layered Architecture chuẩn:
 
-Phân quyền Admin / User
-
-
-
-Hỗ trợ tìm kiếm, lọc, phân trang
-
-
-
-Cung cấp API thống kê phục vụ dashboard admin
-
-
-
-Thiết kế theo hướng mở rộng dễ dàng cho giai đoạn sau
-
-
-
-🛠 Công nghệ sử dụng
-
-
-
-Java 17
-
-
-
-Spring Boot
-
-
-
-Spring Security + JWT
-
-
-
-Spring Data JPA
-
-
-
-Specification API
-
-
-
-MySQL
-
-
-
-Flyway (quản lý migration)
-
-
-
-Postman (test API)
-
-
-
-📁 Cấu trúc chính
-
-src/main/java/org/example/game\_download\_platform
-
+project-root
+├── backend (Spring Boot)
+│   ├── config          # Security, WebSocket, JWT configuration
+│   ├── controller      # REST APIs (Admin/User/Download)
+│   ├── service         # Business Logic (Secure Token, Async tasks)
+│   ├── repository      # JPA & Specification
+│   └── entity          # DB Models (User, Game, DownloadToken...)
 │
+└── frontend (ReactJS)
+    ├── src/api         # Axios Client & Interceptors
+    ├── src/pages       # Admin Dashboard, Game Detail, Auth
+    └── src/components  # Reusable UI (Navbar, Modal, Cards)
+⚙️ Cài Đặt & Chạy (Installation)
+Yêu cầu:
+Java 17+
 
-├── config          # Security, JWT config
+Node.js 16+
 
-├── controller      # REST Controllers (Admin / User)
+MySQL 8.0
 
-├── service
+Các bước:
+Backend:
 
-│   ├── impl        # Business logic
+Cấu hình database trong application.properties.
 
-│   └── interface
+Chạy lệnh: ./gradlew bootRun (Flyway sẽ tự động khởi tạo bảng).
 
-├── repository
+Frontend:
 
-│   ├── specification
+Vào thư mục frontend: cd frontend
 
-│   └── JpaRepository
+Cài đặt: npm install
 
-├── dto
+Chạy: npm run dev
 
-│   ├── request
+Truy cập:
 
-│   └── response
-
-├── entity
-
-├── exception
-
-└── mapper
-
-
-
-🔐 Xác thực \& phân quyền
-
-
-
-Đăng ký / đăng nhập bằng JWT
-
-
-
-Phân quyền:
-
-
-
-USER: xem game, tìm kiếm, thống kê public
-
-
-
-ADMIN: CRUD game, category, xem thống kê nâng cao
-
-
-
-Toàn bộ API admin được bảo vệ bằng role ADMIN
-
-
-
-🎯 Các chức năng đã hoàn thành
-
-👤 Auth
-
-
-
-Đăng ký
-
-
-
-Đăng nhập
-
-
-
-JWT Authorization
-
-
-
-🎮 Game (Admin)
-
-
-
-Tạo game mới
-
-
-
-Cập nhật game
-
-
-
-Bật / tắt game
-
-
-
-Xoá game
-
-
-
-Phân trang + sort
-
-
-
-Gán game vào category
-
-
-
-🔍 Game Search (Specification)
-
-
-
-Tìm theo:
-
-
-
-keyword (title)
-
-
-
-categoryId
-
-
-
-enabled
-
-
-
-Kết hợp nhiều điều kiện
-
-
-
-Phân trang + sort
-
-
-
-Không lỗi khi param = null
-
-
-
-📊 Statistics – Game (Admin)
-
-
-
-Tổng số game
-
-
-
-Game đang hoạt động
-
-
-
-Game bị disable
-
-
-
-Top game:
-
-
-
-Theo view
-
-
-
-Theo download
-
-
-
-DTO tối ưu riêng cho dashboard (không dư dữ liệu)
-
-
-
-🗂 Statistics – Category (Admin)
-
-
-
-Tổng game theo category
-
-
-
-Game active / disabled theo category
-
-
-
-Tổng view / download theo category
-
-
-
-JPQL select new DTO tối ưu, không load entity dư
-
-
-
-🧪 Test API
-
-
-
-Test bằng Postman
-
-
-
-Có đầy đủ:
-
-
-
-Auth (Bearer Token)
-
-
-
-Admin APIs
-
-
-
-Search APIs
-
-
-
-Statistics APIs
-
-
-
-🗄 Database
-
-
-
-Quản lý bằng Flyway
-
-
-
-Các migration chính:
-
-
-
-User / Role
-
-
-
-Category
-
-
-
-Game
-
-
-
-Download
-
-
-
-Dữ liệu mẫu để test thống kê
-
-
-
-🧠 Điểm mạnh của backend hiện tại
-
-
-
-Logic rõ ràng, tách layer chuẩn
-
-
-
-Specification linh hoạt
-
-
-
-DTO riêng cho từng use-case
-
-
-
-Query tối ưu (JPQL, aggregate)
-
-
-
-Dễ mở rộng sang:
-
-
-
-React frontend
-
-
-
-Caching
-
-
-
-Cloud storage
-
-
-
-Recommendation
-
-
-
-🛣 Hướng phát triển tiếp theo
-
-
-
-Top Category (ranking)
-
-
-
-Download history chi tiết
-
-
-
-Thống kê theo thời gian
-
-
-
-Frontend React
-
-
-
-Redis cache
-
-
-
-Deploy (Docker / Cloud)
-
-
-
-👨‍💻 Tác giả
-
-
-
-Văn Thành
-
-
-
-Backend Developer (Java / Spring)
-
+Web: http://localhost:5173
