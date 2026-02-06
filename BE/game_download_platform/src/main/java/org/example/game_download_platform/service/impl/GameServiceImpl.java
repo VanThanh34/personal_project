@@ -13,6 +13,7 @@ import org.example.game_download_platform.service.IGameService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class GameServiceImpl implements IGameService {
 
     private final IGameRepository gameRepository;
     private final ICategoryRepository categoryRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public Page<GameResponse> getAll(Pageable pageable) {
@@ -33,16 +35,21 @@ public class GameServiceImpl implements IGameService {
     @Override
     @Transactional
     public GameResponse getDetail(Long id) {
-        Game game = gameRepository
-                .findByIdAndEnabledTrue(id)
-                .orElseThrow(() ->
-                        new GameDisabledException("Game đã bị gỡ")
-                );
+        // 1. Tìm game
+        Game game = gameRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Game not found"));
 
+        // 2. Tăng view count (Logic mới)
         game.setViewCount(game.getViewCount() + 1);
+        gameRepository.save(game);
+
+        // 3. BẮN TÍN HIỆU WEBSOCKET (QUAN TRỌNG)
+        // Gửi tin nhắn "UPDATE_STATS" tới tất cả ai đang nghe ở "/topic/admin-update"
+        messagingTemplate.convertAndSend("/topic/admin-update", "REFRESH_DASHBOARD");
 
         return mapToResponse(game);
     }
+
     @Override
     public Page<GameResponse> searchGames(
             String keyword,
@@ -80,22 +87,11 @@ public class GameServiceImpl implements IGameService {
                 .thumbnailUrl(game.getThumbnailUrl())
                 .downloadUrl(game.getDownloadUrl())
                 .fileSize(game.getFileSize())
-
-                .categoryId(
-                        game.getCategory() != null
-                                ? game.getCategory().getId()
-                                : null
-                )
-                .categoryName(
-                        game.getCategory() != null
-                                ? game.getCategory().getName()
-                                : null
-                )
-
-                .viewCount( game.getViewCount())
-                .downloadCount( game.getDownloadCount())
+                .categoryId(game.getCategory() != null ? game.getCategory().getId() : null)
+                .categoryName(game.getCategory() != null ? game.getCategory().getName() : null)
+                .viewCount(game.getViewCount())
+                .downloadCount(game.getDownloadCount())
                 .enabled(game.isEnabled())
-
                 .createdAt(LocalDateTime.now())
                 .build();
     }

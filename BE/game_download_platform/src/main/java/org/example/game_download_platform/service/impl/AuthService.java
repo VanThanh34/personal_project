@@ -10,6 +10,8 @@ import org.example.game_download_platform.repository.IUserRepository;
 import org.example.game_download_platform.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,14 +50,20 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    // --- ĐÃ SỬA LẠI HÀM LOGIN ĐỂ HẾT BÁO ĐỎ ---
     public String login(LoginRequest request) {
-        authenticationManager.authenticate(
+        // 1. Xác thực username/password
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
                 )
         );
 
-        return jwtUtil.generateToken(request.getUsername());
+        // 2. Lấy UserDetails từ kết quả xác thực (chứa đầy đủ quyền hạn)
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        // 3. Truyền UserDetails vào JwtUtil để tạo Token có chứa Roles
+        return jwtUtil.generateToken(userDetails);
     }
 }

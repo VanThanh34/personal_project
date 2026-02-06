@@ -30,27 +30,28 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable()) // Tắt CORS tạm thời để test cho dễ
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(authenticationEntryPoint) // 401
-                        .accessDeniedHandler(accessDeniedHandler)           // 403
+                        .authenticationEntryPoint(authenticationEntryPoint) // Xử lý lỗi 401
+                        .accessDeniedHandler(accessDeniedHandler)           // Xử lý lỗi 403
                 )
                 .authorizeHttpRequests(auth -> auth
-
-                        // PUBLIC
+                        // --- PUBLIC ENDPOINTS ---
                         .requestMatchers(HttpMethod.GET, "/games/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/games/stats/**").permitAll()
+                        .requestMatchers("/games/stats/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
 
-                        // DOWNLOAD
-                        .requestMatchers(HttpMethod.POST, "/games/*/download")
-                        .hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/ws/**").permitAll()
+                        // --- MỞ QUYỀN CHO LINK TẢI FILE (Token lo bảo mật rồi) ---
+                        .requestMatchers("/downloads/file").permitAll()
 
-                        // ADMIN
+                        // PROTECTED ENDPOINTS
+                        .requestMatchers("/downloads/generate/**").authenticated() // Tạo link phải login
+                        .requestMatchers("/downloads/history").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
@@ -58,7 +59,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {

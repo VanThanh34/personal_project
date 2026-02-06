@@ -20,33 +20,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain)
             throws ServletException, IOException {
 
+        // Lấy header Authorization
         String authHeader = request.getHeader("Authorization");
+        String token = null;
+        String username = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7); // Cắt bỏ "Bearer "
 
-            if (jwtUtil.isValid(token)) {
-                String username = jwtUtil.extractUsername(token);
+                // Kiểm tra username trước
+                username = jwtUtil.extractUsername(token);
 
-                var userDetails = userDetailsService.loadUserByUsername(username);
+                // Check xem user đã được authenticate chưa để tránh làm lại
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
+                    // Kiểm tra tính hợp lệ của Token
+                    if (jwtUtil.isValid(token)) {
+                        var userDetails = userDetailsService.loadUserByUsername(username);
 
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
+                        var authToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities()
+                        );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                        authToken.setDetails(
+                                new WebAuthenticationDetailsSource().buildDetails(request)
+                        );
+
+                        // QUAN TRỌNG: Set User vào SecurityContext
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                        System.out.println("✅ Auth Success for user: " + username);
+                    } else {
+                        System.out.println("❌ Token Valid Check Failed for: " + username);
+                    }
+                }
             }
+        } catch (Exception e) {
+            // Log lỗi để debug (ví dụ: Token hết hạn, sai chữ ký...)
+            System.err.println("⚠️ JWT Filter Error: " + e.getMessage());
         }
 
         chain.doFilter(request, response);
