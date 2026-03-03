@@ -31,7 +31,6 @@ const GameDetailPage = () => {
         const fetchGame = async () => {
             try {
                 const res = await axiosClient.get(`/games/${id}`);
-                // Chỗ này ông làm đúng rồi nè (res.data || res)
                 setGame(res.data || res);
             } catch (error) {
                 console.error("Error fetching game:", error);
@@ -41,8 +40,6 @@ const GameDetailPage = () => {
         };
         fetchGame();
     }, [id]);
-
-    // --- HÀM DOWNLOAD (ĐÃ SỬA LỖI UNDEFINED) ---
     const handleDownload = async () => {
         if (!isAuthenticated) {
             setShowLoginModal(true);
@@ -57,25 +54,20 @@ const GameDetailPage = () => {
 
         try {
             const response = await axiosClient.post(`/downloads/generate/${id}`);
-
-            // --- SỬA LỖI TẠI ĐÂY ---
-            // Kiểm tra kỹ: nếu response.data có thì lấy, không thì lấy chính response
             const secureLink = response.data || response;
 
-            // Log ra để kiểm tra chắc chắn nó là Link chứ không phải undefined
             console.log("Link tải nhận được:", secureLink);
 
             if (!secureLink || typeof secureLink !== 'string' || !secureLink.startsWith('http')) {
                 throw new Error("Link tải không hợp lệ!");
             }
 
-            // Kích hoạt tải xuống
-            window.location.href = secureLink;
+            // window.location.href = secureLink; // Tạm tắt redirect để test
 
             setDownloadModal({
                 show: true,
                 status: 'success',
-                message: 'Link tải dùng 1 lần đã kích hoạt! Trình duyệt đang tải file...'
+                message: `Link tải của bạn: ${secureLink}`
             });
 
         } catch (error) {
@@ -150,9 +142,9 @@ const GameDetailPage = () => {
                                 disabled={downloadModal.status === 'processing'}
                                 className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-primary/40 transition-all hover:-translate-y-1 flex items-center justify-center gap-3 relative overflow-hidden group
                                     ${downloadModal.status === 'processing'
-                                    ? 'bg-gray-700 cursor-not-allowed text-gray-400'
-                                    : 'bg-gradient-to-r from-primary to-secondary text-white'
-                                }`}
+                                        ? 'bg-gray-700 cursor-not-allowed text-gray-400'
+                                        : 'bg-gradient-to-r from-primary to-secondary text-white'
+                                    }`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -230,7 +222,7 @@ const GameDetailPage = () => {
                             </svg>
                         </div>
                         <h3 className="text-2xl font-bold text-white mb-2">Yêu Cầu Đăng Nhập</h3>
-                        <p className="text-gray-400 mb-8">Ông bạn già ơi, cần đăng nhập mới tải được game nhé!</p>
+                        <p className="text-gray-400 mb-8">Ông bạn ơi, cần đăng nhập mới tải được game nhé!</p>
                         <div className="flex gap-4">
                             <button onClick={() => setShowLoginModal(false)} className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-xl transition-colors">Để sau</button>
                             <button onClick={redirectToLogin} className="flex-1 py-3 bg-primary hover:bg-pink-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-neon-pink">Đăng Nhập Ngay</button>

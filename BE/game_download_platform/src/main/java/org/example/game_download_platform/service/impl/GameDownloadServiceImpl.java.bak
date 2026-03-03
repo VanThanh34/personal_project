@@ -113,13 +113,7 @@ public class GameDownloadServiceImpl implements IGameDownloadService {
 
         // TRƯỜNG HỢP A: Là Link Online (Google Drive, Fshare...)
         if (downloadUrl.startsWith("http://") || downloadUrl.startsWith("https://")) {
-            try {
-                // Thay vì trả về String (Redirect), ta trả về Resource để Stream qua Server
-                // (Proxy)
-                return new UrlResource(downloadUrl);
-            } catch (MalformedURLException e) {
-                throw new RuntimeException("Link tải ngoài không hợp lệ: " + e.getMessage());
-            }
+            return downloadUrl; // Trả về String để Controller biết mà Redirect
         }
 
         // TRƯỜNG HỢP B: Là File trên Server (Local)

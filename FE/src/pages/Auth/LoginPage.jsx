@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import axiosClient from '../../api/axiosClient'; // Import axiosClient để gọi API
+import axiosClient from '../../api/axiosClient';
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // State cho Modal Lỗi
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -20,20 +19,13 @@ const LoginPage = () => {
         setIsLoading(true);
 
         try {
-            // Gọi API đăng nhập từ Backend
-            // Lưu ý: Đường dẫn '/auth/login' tùy thuộc vào Controller của ông
             const res = await axiosClient.post('/auth/login', { username, password });
 
-            // Xử lý dữ liệu trả về (hỗ trợ cả trường hợp axios đã bóc vỏ hoặc chưa)
             const data = res.data || res;
 
             if (data.token) {
-                // Đăng nhập thành công -> Lưu vào Context
-                // data.user hoặc data tùy thuộc vào BE trả về object nào chứa roles
-                // Giả sử BE trả về: { token: "...", roles: ["ROLE_ADMIN"], username: "..." }
                 login(data, data.token);
 
-                // Điều hướng dựa trên quyền (Role)
                 const roles = data.roles || [];
                 if (roles.includes('ROLE_ADMIN') || roles.includes('ADMIN')) {
                     navigate('/admin/dashboard');
@@ -46,7 +38,6 @@ const LoginPage = () => {
 
         } catch (error) {
             console.error("Login Error:", error);
-            // Lấy thông báo lỗi từ Backend nếu có
             const msg = error.response?.data?.message || "Tên đăng nhập hoặc mật khẩu không đúng!";
             setErrorMessage(msg);
             setShowErrorModal(true); // Hiện Modal thay vì alert
@@ -120,7 +111,7 @@ const LoginPage = () => {
                 </div>
             </div>
 
-            {/* ============== ERROR MODAL (Thay thế Alert) ============== */}
+            {/* ============== ERROR MODAL ============== */}
             {showErrorModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     {/* Backdrop */}

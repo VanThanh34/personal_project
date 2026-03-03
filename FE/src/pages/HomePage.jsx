@@ -3,34 +3,61 @@ import axiosClient from '../api/axiosClient';
 import { Link } from 'react-router-dom';
 
 const HomePage = () => {
-    const [games, setGames] = useState([]);
+    const [allGames, setAllGames] = useState([]); // Dữ liệu gốc cho Top Game
+    const [games, setGames] = useState([]);      // Dữ liệu cho Grid (có thể bị search/filter)
     const [filteredGames, setFilteredGames] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('Tất cả');
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // State mới: Dùng để sắp xếp Top Game
-    const [sortBy, setSortBy] = useState('download'); // Mặc định là lượt tải
+    // State Dùng để sắp xếp Top Game
+    const [sortBy, setSortBy] = useState('download');
 
     const categories = ['Tất cả', 'Hành động', 'Nhập vai', 'Phiêu lưu', 'Chiến thuật', 'Game Indie', 'Thể thao'];
 
+    // 1. Fetch dữ liệu gốc ban đầu (Chạy 1 lần)
     useEffect(() => {
-        const fetchGames = async () => {
+        const fetchInitialData = async () => {
             try {
                 const res = await axiosClient.get('/games');
-                console.log("Dữ liệu nhận được:", res);
-                // Xử lý dữ liệu linh hoạt
                 const data = res.content || res.data?.content || (Array.isArray(res) ? res : []);
-                setGames(data);
-                setFilteredGames(data);
+                setAllGames(data);       // Lưu làm gốc để tính Top Game
+                setGames(data);          // Lưu vào list hiển thị
+                setFilteredGames(data);  // Lưu vào list filter
             } catch (error) {
                 console.error("Lỗi lấy danh sách game:", error);
-                setGames([]);
             } finally {
                 setLoading(false);
             }
         };
-        fetchGames();
+        fetchInitialData();
     }, []);
+
+    // 2. Hàm tìm kiếm (Gọi API Search)
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            let res;
+            if (searchTerm.trim()) {
+                res = await axiosClient.get('/games/search', {
+                    params: { keyword: searchTerm }
+                });
+            } else {
+                res = await axiosClient.get('/games');
+            }
+            const data = res.content || res.data?.content || (Array.isArray(res) ? res : []);
+
+            setGames(data);           // Cập nhật list hiển thị
+            setFilteredGames(data);   // Cập nhật list filter
+            setActiveCategory('Tất cả');
+        } catch (error) {
+            console.error("Lỗi tìm kiếm:", error);
+            setGames([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleFilter = (category) => {
         setActiveCategory(category);
@@ -44,17 +71,15 @@ const HomePage = () => {
         }
     };
 
-    // LOGIC MỚI: Sắp xếp Top Game dựa trên lựa chọn (sortBy)
-    const topGames = [...games]
+    // 3. Top Game luôn tính từ allGames (Không bị ảnh hưởng bởi Search)
+    const topGames = [...allGames]
         .sort((a, b) => {
             if (sortBy === 'view') {
-                // Sắp xếp theo lượt xem giảm dần
                 return (b.viewCount || 0) - (a.viewCount || 0);
             }
-            // Mặc định: Sắp xếp theo lượt tải giảm dần
             return (b.downloadCount || 0) - (a.downloadCount || 0);
         })
-        .slice(0, 3); // Chỉ lấy top 3
+        .slice(0, 3);
 
     if (loading) return (
         <div className="min-h-screen bg-background flex items-center justify-center">
@@ -77,10 +102,33 @@ const HomePage = () => {
                     <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-10">
                         Tải game miễn phí, tốc độ cao. Cập nhật liên tục các tựa game hot nhất từ thị trường.
                     </p>
+
+                    {/* SEARCH BAR */}
+                    <div className="max-w-2xl mx-auto relative group z-10">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-600 rounded-full blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                        <form onSubmit={handleSearch} className="relative flex items-center bg-gray-900 rounded-full p-2 border border-gray-700 shadow-2xl">
+                            <input
+                                type="text"
+                                className="flex-1 bg-transparent text-white px-6 py-3 focus:outline-none placeholder-gray-500 font-medium"
+                                placeholder="Bạn muốn tìm game gì hôm nay? (VD: GTA, Elden Ring...)"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <button
+                                type="submit"
+                                className="bg-primary hover:bg-pink-600 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg hover:shadow-neon-pink flex items-center gap-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <span>TÌM</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </section>
 
-            {/* TOP TRENDING SECTION - CÓ SẮP XẾP */}
+            {/* TOP TRENDING SECTION */}
             {topGames.length > 0 && (
                 <section id="top-games" className="container mx-auto px-6 mb-20">
                     {/* Header Top Game + Dropdown Sort */}
@@ -90,16 +138,16 @@ const HomePage = () => {
                             <h2 className="text-2xl font-display font-bold">GAME NỔI BẬT</h2>
                         </div>
 
-                        {/* Dropdown chọn kiểu sắp xếp */}
+
                         <div className="flex items-center gap-3 bg-surface p-1 rounded-lg border border-gray-700">
                             <span className="text-xs font-bold text-gray-400 pl-3">Xếp theo:</span>
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                // Nút chọn vẫn giữ text-white để đẹp đội hình
+
                                 className="bg-transparent text-white text-sm font-bold focus:outline-none p-2 rounded-md cursor-pointer hover:bg-white/5"
                             >
-                                {/* Sửa lại Option: Chữ đen, nền trắng cho dễ nhìn */}
+
                                 <option value="download" className="text-black bg-white">
                                     ⬇ Lượt tải nhiều nhất
                                 </option>
@@ -130,7 +178,7 @@ const HomePage = () => {
                                     </span>
                                     <h3 className="text-xl font-bold truncate">{game.title}</h3>
 
-                                    {/* Hiển thị chỉ số phụ thuộc vào việc đang sort theo gì */}
+
                                     <div className="mt-2 text-xs text-gray-400 font-bold flex items-center gap-2">
                                         {sortBy === 'download' ? (
                                             <span className="text-green-400 flex items-center gap-1">
@@ -157,11 +205,10 @@ const HomePage = () => {
                         <button
                             key={cat}
                             onClick={() => handleFilter(cat)}
-                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
-                                activeCategory === cat
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${activeCategory === cat
                                     ? 'bg-primary text-white shadow-neon-pink scale-105'
                                     : 'bg-surface text-gray-400 hover:bg-gray-800 hover:text-white'
-                            }`}
+                                }`}
                         >
                             {cat}
                         </button>
@@ -208,8 +255,20 @@ const HomePage = () => {
                         ))
                     ) : (
                         <div className="col-span-full text-center py-20">
-                            <p className="text-gray-500 text-xl">Chưa có game nào trong mục "{activeCategory}".</p>
-                            <button onClick={() => handleFilter('Tất cả')} className="mt-4 text-primary hover:underline">
+                            <p className="text-gray-500 text-xl">
+                                {searchTerm
+                                    ? `Không tìm thấy game nào cho từ khóa "${searchTerm}"`
+                                    : `Chưa có game nào trong mục "${activeCategory}"`
+                                }
+                            </p>
+                            <button
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    fetchGames('');
+                                    setActiveCategory('Tất cả');
+                                }}
+                                className="mt-4 text-primary hover:underline"
+                            >
                                 Xem tất cả game
                             </button>
                         </div>

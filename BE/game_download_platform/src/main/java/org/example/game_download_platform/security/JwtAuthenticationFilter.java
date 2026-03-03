@@ -22,8 +22,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain chain)
+            HttpServletResponse response,
+            FilterChain chain)
             throws ServletException, IOException {
 
         // Lấy header Authorization
@@ -46,12 +46,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         var userDetails = userDetailsService.loadUserByUsername(username);
 
                         var authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities()
-                        );
+                                userDetails, null, userDetails.getAuthorities());
 
                         authToken.setDetails(
-                                new WebAuthenticationDetailsSource().buildDetails(request)
-                        );
+                                new WebAuthenticationDetailsSource().buildDetails(request));
 
                         // QUAN TRỌNG: Set User vào SecurityContext
                         SecurityContextHolder.getContext().setAuthentication(authToken);

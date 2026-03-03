@@ -18,10 +18,10 @@ const Footer = () => {
                     <div>
                         <h4 className="text-white font-bold mb-6 font-display">Danh Mục</h4>
                         <ul className="space-y-3 text-sm text-gray-400">
-                            <li><Link to="/search?category=action" className="hover:text-primary transition-colors">Hành Động</Link></li>
-                            <li><Link to="/search?category=rpg" className="hover:text-primary transition-colors">Nhập Vai</Link></li>
-                            <li><Link to="/search?category=strategy" className="hover:text-primary transition-colors">Chiến Thuật</Link></li>
-                            <li><Link to="/search?category=indie" className="hover:text-primary transition-colors">Game Indie</Link></li>
+                            <li><Link to="/categories/Hành động" className="hover:text-primary transition-colors">Hành Động</Link></li>
+                            <li><Link to="/categories/Nhập vai" className="hover:text-primary transition-colors">Nhập Vai</Link></li>
+                            <li><Link to="/categories/Chiến thuật" className="hover:text-primary transition-colors">Chiến Thuật</Link></li>
+                            <li><Link to="/categories/Game Indie" className="hover:text-primary transition-colors">Game Indie</Link></li>
                         </ul>
                     </div>
 
@@ -29,9 +29,9 @@ const Footer = () => {
                         <h4 className="text-white font-bold mb-6 font-display">Hỗ Trợ</h4>
                         <ul className="space-y-3 text-sm text-gray-400">
                             <li><Link to="#" className="hover:text-primary transition-colors">Hướng dẫn tải</Link></li>
-                            <li><Link to="#" className="hover:text-primary transition-colors">Báo lỗi link</Link></li>
+                            <li><Link to="https://www.facebook.com/BinchiLinhh/" className="hover:text-primary transition-colors">Báo lỗi link</Link></li>
                             <li><Link to="#" className="hover:text-primary transition-colors">Chính sách bảo mật</Link></li>
-                            <li><Link to="#" className="hover:text-primary transition-colors">Liên hệ</Link></li>
+                            <li><Link to="https://www.facebook.com/BinchiLinhh/" className="hover:text-primary transition-colors">Liên hệ Admin</Link></li>
                         </ul>
                     </div>
 

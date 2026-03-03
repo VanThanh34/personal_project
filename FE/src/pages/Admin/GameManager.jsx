@@ -49,20 +49,19 @@ const GameManager = () => {
                         {sortParam.includes('id') && 'Đang sắp xếp: Mới nhất 🕒'}
                     </p>
                 </div>
-                {/* ... (Giữ nguyên nút Thêm game cũ) */}
                 <button className="bg-primary hover:bg-pink-600 px-6 py-3 rounded-xl font-bold shadow-lg shadow-primary/30">
                     + Thêm Game
                 </button>
             </div>
 
-            {/* ... (Giữ nguyên Table cũ của ông) */}
+
             <div className="bg-surface rounded-xl border border-gray-700 overflow-hidden shadow-xl">
                 <table className="w-full text-left">
                     <thead className="bg-gray-800 text-gray-400 uppercase text-xs">
                     <tr>
                         <th className="p-4">ID</th>
                         <th className="p-4">Game</th>
-                        <th className="p-4">Thống kê</th> {/* Gộp Download/View vào cột này cho gọn */}
+                        <th className="p-4">Thống kê</th>
                         <th className="p-4">Trạng thái</th>
                         <th className="p-4 text-center">Hành Động</th>
                     </tr>

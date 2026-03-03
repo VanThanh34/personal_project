@@ -40,13 +40,11 @@ const AdminDashboard = () => {
         fetchAllData();
     }, []);
 
-    // 2. KẾT NỐI WEBSOCKET (REAL-TIME UPDATE)
+    // 2. KẾT NỐI WEBSOCKET
     useEffect(() => {
         // Lưu ý: Dùng đường dẫn gốc http://localhost:8080/ws để tránh lỗi proxy
         const socket = new SockJS('http://localhost:8080/ws');
         const stompClient = Stomp.over(socket);
-
-        // Tắt log debug trong console cho đỡ rối
         stompClient.debug = null;
 
         stompClient.connect({}, () => {
@@ -96,7 +94,6 @@ const AdminDashboard = () => {
     // Hàm xử lý ảnh lỗi (Fallback Image)
     const handleImageError = (e) => {
         e.target.onerror = null; // Tránh loop vô hạn
-        // Ảnh mặc định khi ảnh gốc bị lỗi
         e.target.src = "https://placehold.co/64x64/2d2d2d/FFF?text=GAME";
     };
 

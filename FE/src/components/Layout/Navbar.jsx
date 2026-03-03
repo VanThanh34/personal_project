@@ -30,14 +30,13 @@ const Navbar = () => {
 
     const navLinks = [
         { name: 'TRANG CHỦ', path: '/' },
-        { name: 'TOP GAME', path: '/#top-games' },
+        { name: 'TOP GAME', path: '/top-games' },
         { name: 'CỘNG ĐỒNG', path: '/community' },
     ];
 
     return (
-        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-            scrolled ? 'bg-background/95 backdrop-blur-md shadow-lg border-b border-gray-800' : 'bg-transparent py-4'
-        }`}>
+        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-background/95 backdrop-blur-md shadow-lg border-b border-gray-800' : 'bg-transparent py-4'
+            }`}>
             <div className="container mx-auto px-6 flex items-center justify-between h-16">
                 {/* LOGO */}
                 <Link to="/" className="text-2xl font-display font-black tracking-tighter text-white flex items-center gap-2">
@@ -53,15 +52,14 @@ const Navbar = () => {
                         <Link
                             key={link.name}
                             to={link.path}
-                            className={`text-sm font-bold tracking-widest transition-colors hover:text-primary ${
-                                location.pathname === link.path ? 'text-primary' : 'text-gray-300'
-                            }`}
+                            className={`text-sm font-bold tracking-widest transition-colors hover:text-primary ${location.pathname === link.path ? 'text-primary' : 'text-gray-300'
+                                }`}
                         >
                             {link.name}
                         </Link>
                     ))}
 
-                    {/* Link riêng cho Admin nếu muốn hiện ở thanh chính */}
+
                     {isAuthenticated && isAdmin() && (
                         <Link to="/admin" className="text-sm font-bold tracking-widest text-secondary hover:text-white transition-colors">
                             QUẢN TRỊ

@@ -38,7 +38,7 @@ const RegisterPage = () => {
             setModal({
                 show: true,
                 type: 'success',
-                message: 'Tài khoản đã được tạo thành công! Hãy đăng nhập để tải game.'
+                message: 'Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.'
             });
         } else {
             // Hiện Modal Lỗi
@@ -147,7 +147,7 @@ const RegisterPage = () => {
                 </div>
             </div>
 
-            {/* ============== MODAL THÔNG BÁO (Success/Error) ============== */}
+            {/* ============== MODAL THÔNG BÁO ============== */}
             {modal.show && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div

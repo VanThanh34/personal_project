@@ -10,8 +10,6 @@ export const AuthProvider = ({ children }) => {
         return savedUser ? JSON.parse(savedUser) : null;
     });
 
-    // --- HÀM GIẢI MÃ JWT (MỚI) ---
-    // Hàm này giúp "đọc" thông tin ẩn bên trong token
     const parseJwt = (token) => {
         try {
             const base64Url = token.split('.')[1];
@@ -26,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Hàm Login (Đã nâng cấp)
+    // Hàm Login
     const login = (apiResponse, token) => {
         // 1. Giải mã token để lấy thông tin gốc từ Backend
         const decodedToken = parseJwt(token);
@@ -73,17 +71,16 @@ export const AuthProvider = ({ children }) => {
     const isAdmin = () => {
         if (!user) return false;
 
-        // Lấy roles từ user (lúc này đã được decode chuẩn từ token)
+        // Lấy roles từ user
         const roles = user.roles || [];
 
         console.log("Đang kiểm tra quyền Admin. User roles:", roles);
 
         if (!Array.isArray(roles) || roles.length === 0) return false;
 
-        // Check xem có chữ ADMIN nào trong mảng roles không
+
         return roles.some(role => {
             const r = String(role).toUpperCase();
-            // Spring Security có thể lưu là "ROLE_ADMIN", "ADMIN", hoặc "SCOPE_ADMIN"
             return r.includes('ADMIN');
         });
     };

@@ -18,7 +18,8 @@ public class DownloadToken {
     private Long userId; // Ai là người tạo link này
     private Long gameId; // Link này tải game gì
 
-    private boolean isUsed = false; // Đã dùng chưa?
+    @Column(name = "is_used")
+    private boolean used = false; // Đã dùng chưa?
 
     private LocalDateTime expiryTime; // Hạn sử dụng (ví dụ 1 tiếng)
 }

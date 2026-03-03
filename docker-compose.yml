@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # 1. DỊCH VỤ DATABASE (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: game_mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: codegym
+      MYSQL_DATABASE: game_download_platform
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # Đảm bảo database luôn tự khởi động lại nếu có lỗi
+    restart: unless-stopped
+
+  # 2. DỊCH VỤ BACKEND (Java Spring Boot)
+  backend:
+    # Trỏ đúng vào thư mục chứa Dockerfile của Backend
+    build: ./BE/game_download_platform
+    container_name: game_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      # Ghi đè cấu hình để gọi sang container 'db' thay vì localhost
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/game_download_platform?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=codegym
+    restart: unless-stopped
+
+  # 3. DỊCH VỤ FRONTEND (React/Vite)
+  frontend:
+    # Trỏ vào thư mục FE
+    build: ./FE
+    container_name: game_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+# Khai báo volume để lưu trữ dữ liệu Database vĩnh viễn (không bị mất khi xóa container)
+volumes:
+  mysql_data:
