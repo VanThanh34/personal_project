@@ -39,6 +39,7 @@ public class GameController {
         return ResponseEntity.ok(gameService.getDetail(id));
     }
 
+    
     // 3. Tìm kiếm game
     @GetMapping("/search")
     public ResponseEntity<PagedResponse<GameResponse>> searchGames(
