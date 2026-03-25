@@ -1,87 +1,103 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../api/axiosClient';
 import { Link } from 'react-router-dom';
+import FavoriteButton from '../components/UI/FavoriteButton';
 
 const HomePage = () => {
-    const [allGames, setAllGames] = useState([]); // Dữ liệu gốc cho Top Game
-    const [games, setGames] = useState([]);      // Dữ liệu cho Grid (có thể bị search/filter)
-    const [filteredGames, setFilteredGames] = useState([]);
+    const [games, setGames] = useState([]);
+    const [topGames, setTopGames] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeCategory, setActiveCategory] = useState('Tất cả');
-    const [searchTerm, setSearchTerm] = useState('');
 
-    // State Dùng để sắp xếp Top Game
-    const [sortBy, setSortBy] = useState('download');
+    // Pagination & Filter States
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [activeCategory, setActiveCategory] = useState({ id: null, name: 'Tất cả' });
+    const [searchInput, setSearchInput] = useState('');
+    const [appliedSearch, setAppliedSearch] = useState(''); // Chỉ tìm khi submit
+    const [sortBy, setSortBy] = useState('download'); // download hoặc view
 
-    const categories = ['Tất cả', 'Hành động', 'Nhập vai', 'Phiêu lưu', 'Chiến thuật', 'Game Indie', 'Thể thao'];
+    const categories = [
+        { id: null, name: 'Tất cả' },
+        { id: 1, name: 'Hành động' },
+        { id: 2, name: 'Nhập vai' },
+        { id: 3, name: 'Phiêu lưu' },
+        { id: 5, name: 'Chiến thuật' },
+        { id: 6, name: 'Kinh dị' },
+        { id: 4, name: 'Thể thao' }
+    ];
 
-    // 1. Fetch dữ liệu gốc ban đầu (Chạy 1 lần)
+    // Fetch Top Games độc lập
     useEffect(() => {
-        const fetchInitialData = async () => {
+        const fetchTopGames = async () => {
             try {
-                const res = await axiosClient.get('/games');
-                const data = res.content || res.data?.content || (Array.isArray(res) ? res : []);
-                setAllGames(data);       // Lưu làm gốc để tính Top Game
-                setGames(data);          // Lưu vào list hiển thị
-                setFilteredGames(data);  // Lưu vào list filter
+                const sortField = sortBy === 'view' ? 'viewCount' : 'downloadCount';
+                const res = await axiosClient.get(`/games/search`, {
+                    params: { sort: `${sortField},desc`, page: 0, size: 3 }
+                });
+                setTopGames(res.content || res.data?.content || []);
+            } catch (error) {
+                console.error("Lỗi lấy Top Game:", error);
+            }
+        };
+        fetchTopGames();
+    }, [sortBy]);
+
+    // Fetch Games Grid (Phân trang thực sự trên Server)
+    useEffect(() => {
+        const fetchGames = async () => {
+            setLoading(true);
+            try {
+                const params = { page, size: 10 };
+                if (appliedSearch.trim()) params.keyword = appliedSearch;
+                if (activeCategory.id) params.categoryId = activeCategory.id;
+
+                const res = await axiosClient.get('/games/search', { params });
+                setGames(res.content || res.data?.content || []);
+                setTotalPages(res.totalPages !== undefined ? res.totalPages : (res.data?.totalPages || 0));
             } catch (error) {
                 console.error("Lỗi lấy danh sách game:", error);
+                setGames([]);
             } finally {
                 setLoading(false);
             }
         };
-        fetchInitialData();
-    }, []);
+        fetchGames();
+    }, [page, activeCategory, appliedSearch]);
 
-    // 2. Hàm tìm kiếm (Gọi API Search)
-    const handleSearch = async (e) => {
+    const handleSearch = (e) => {
         e.preventDefault();
-        setLoading(true);
-        try {
-            let res;
-            if (searchTerm.trim()) {
-                res = await axiosClient.get('/games/search', {
-                    params: { keyword: searchTerm }
-                });
-            } else {
-                res = await axiosClient.get('/games');
-            }
-            const data = res.content || res.data?.content || (Array.isArray(res) ? res : []);
-
-            setGames(data);           // Cập nhật list hiển thị
-            setFilteredGames(data);   // Cập nhật list filter
-            setActiveCategory('Tất cả');
-        } catch (error) {
-            console.error("Lỗi tìm kiếm:", error);
-            setGames([]);
-        } finally {
-            setLoading(false);
-        }
+        setPage(0);
+        setAppliedSearch(searchInput);
+        setActiveCategory({ id: null, name: 'Tất cả' });
     };
 
-    const handleFilter = (category) => {
-        setActiveCategory(category);
-        if (category === 'Tất cả') {
-            setFilteredGames(games);
-        } else {
-            const filtered = games.filter(game =>
-                game.categoryName?.toLowerCase().includes(category.toLowerCase())
-            );
-            setFilteredGames(filtered);
-        }
+    const handleFilter = (catObj) => {
+        setActiveCategory(catObj);
+        setPage(0);
     };
 
-    // 3. Top Game luôn tính từ allGames (Không bị ảnh hưởng bởi Search)
-    const topGames = [...allGames]
-        .sort((a, b) => {
-            if (sortBy === 'view') {
-                return (b.viewCount || 0) - (a.viewCount || 0);
-            }
-            return (b.downloadCount || 0) - (a.downloadCount || 0);
-        })
-        .slice(0, 3);
+    // Helper tính toán các trang hiển thị (2 trước, 2 sau)
+    const getPageNumbers = () => {
+        let startPage = Math.max(0, page - 2);
+        let endPage = Math.min(totalPages - 1, page + 2);
 
-    if (loading) return (
+        // Đảm bảo luôn cố gắng hiển thị đủ 5 nút nếu có thể
+        if (endPage - startPage < 4) {
+            if (startPage === 0) {
+                endPage = Math.min(totalPages - 1, startPage + 4);
+            } else if (endPage === totalPages - 1) {
+                startPage = Math.max(0, endPage - 4);
+            }
+        }
+
+        const pages = [];
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+        return pages;
+    };
+
+    if (loading && games.length === 0) return (
         <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
         </div>
@@ -111,8 +127,8 @@ const HomePage = () => {
                                 type="text"
                                 className="flex-1 bg-transparent text-white px-6 py-3 focus:outline-none placeholder-gray-500 font-medium"
                                 placeholder="Bạn muốn tìm game gì hôm nay? (VD: GTA, Elden Ring...)"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
                             />
                             <button
                                 type="submit"
@@ -179,16 +195,21 @@ const HomePage = () => {
                                     <h3 className="text-xl font-bold truncate">{game.title}</h3>
 
 
-                                    <div className="mt-2 text-xs text-gray-400 font-bold flex items-center gap-2">
-                                        {sortBy === 'download' ? (
-                                            <span className="text-green-400 flex items-center gap-1">
-                                                ⬇ {game.downloadCount} lượt tải
-                                            </span>
-                                        ) : (
-                                            <span className="text-blue-400 flex items-center gap-1">
-                                                👁 {game.viewCount} lượt xem
-                                            </span>
-                                        )}
+                                    <div className="mt-2 text-xs text-gray-400 font-bold flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2">
+                                            {sortBy === 'download' ? (
+                                                <span className="text-green-400 flex items-center gap-1">
+                                                    ⬇ {game.downloadCount} lượt tải
+                                                </span>
+                                            ) : (
+                                                <span className="text-blue-400 flex items-center gap-1">
+                                                    👁 {game.viewCount} lượt xem
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="bg-black/40 backdrop-blur p-1.5 rounded-full hover:bg-black/60 transition-colors pointer-events-auto">
+                                            <FavoriteButton gameId={game.id} />
+                                        </div>
                                     </div>
                                 </div>
                             </Link>
@@ -203,69 +224,78 @@ const HomePage = () => {
                 <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
                     {categories.map((cat) => (
                         <button
-                            key={cat}
+                            key={cat.name}
                             onClick={() => handleFilter(cat)}
-                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${activeCategory === cat
-                                    ? 'bg-primary text-white shadow-neon-pink scale-105'
-                                    : 'bg-surface text-gray-400 hover:bg-gray-800 hover:text-white'
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${activeCategory.name === cat.name
+                                ? 'bg-primary text-white shadow-neon-pink scale-105'
+                                : 'bg-surface text-gray-400 hover:bg-gray-800 hover:text-white'
                                 }`}
                         >
-                            {cat}
+                            {cat.name}
                         </button>
                     ))}
                 </div>
 
                 {/* Game Grid */}
+                {/* Game Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {filteredGames.length > 0 ? (
-                        filteredGames.map((game) => (
-                            <div key={game.id} className="group bg-surface rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all hover:-translate-y-2 hover:shadow-game-card">
-                                <div className="relative aspect-[3/4] overflow-hidden">
-                                    <img
-                                        src={game.thumbnailUrl || 'https://via.placeholder.com/300x400'}
-                                        alt={game.title}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                                        <Link
-                                            to={`/games/${game.id}`}
-                                            className="px-6 py-3 bg-primary text-white font-bold rounded-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
-                                        >
-                                            CHI TIẾT
-                                        </Link>
+                    {games.length > 0 ? (
+                        <>
+                            {games.map((game) => (
+                                <div key={game.id} className="group bg-surface rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all hover:-translate-y-2 hover:shadow-game-card flex flex-col">
+                                    <div className="relative aspect-[3/4] overflow-hidden">
+                                        <img
+                                            src={game.thumbnailUrl || 'https://via.placeholder.com/300x400'}
+                                            alt={game.title}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                            <Link
+                                                to={`/games/${game.id}`}
+                                                className="px-6 py-3 bg-primary text-white font-bold rounded-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
+                                            >
+                                                CHI TIẾT
+                                            </Link>
+                                        </div>
+                                        <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
+                                            <div className="bg-black/50 backdrop-blur px-2 py-1 rounded text-xs font-bold text-gray-300 flex items-center gap-1">
+                                                👁 {game.viewCount || 0}
+                                            </div>
+                                            <div className="bg-black/50 backdrop-blur p-1.5 rounded-full hover:bg-black/80 transition-colors z-10 pointer-events-auto">
+                                                <FavoriteButton gameId={game.id} />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="absolute top-2 right-2 bg-black/50 backdrop-blur px-2 py-1 rounded text-xs font-bold text-gray-300 flex items-center gap-1">
-                                        👁 {game.viewCount || 0}
-                                    </div>
-                                </div>
 
-                                <div className="p-4">
-                                    <div className="text-xs text-gray-500 mb-1">{game.categoryName || 'Game'}</div>
-                                    <h3 className="font-display font-bold text-lg truncate group-hover:text-primary transition-colors">
-                                        {game.title}
-                                    </h3>
-                                    <div className="flex justify-between items-center mt-3 text-xs text-gray-400">
-                                        <span>
-                                            {game.fileSize ? (game.fileSize / 1024 / 1024 / 1024).toFixed(2) + ' GB' : 'N/A'}
-                                        </span>
-                                        <span>⬇ {game.downloadCount || 0}</span>
+                                    <div className="p-4 flex-1 flex flex-col">
+                                        <div className="text-xs text-gray-500 mb-1">{game.categoryName || 'Game'}</div>
+                                        <h3 className="font-display font-bold text-lg truncate group-hover:text-primary transition-colors flex-1">
+                                            {game.title}
+                                        </h3>
+                                        <div className="flex justify-between items-center mt-3 text-xs text-gray-400">
+                                            <span>
+                                                {game.fileSize ? (game.fileSize / 1024 / 1024 / 1024).toFixed(2) + ' GB' : 'N/A'}
+                                            </span>
+                                            <span>⬇ {game.downloadCount || 0}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            ))}
+                        </>
                     ) : (
                         <div className="col-span-full text-center py-20">
                             <p className="text-gray-500 text-xl">
-                                {searchTerm
-                                    ? `Không tìm thấy game nào cho từ khóa "${searchTerm}"`
-                                    : `Chưa có game nào trong mục "${activeCategory}"`
+                                {appliedSearch
+                                    ? `Không tìm thấy game nào cho từ khóa "${appliedSearch}"`
+                                    : `Chưa có game nào trong mục "${activeCategory.name}"`
                                 }
                             </p>
                             <button
                                 onClick={() => {
-                                    setSearchTerm('');
-                                    fetchGames('');
-                                    setActiveCategory('Tất cả');
+                                    setSearchInput('');
+                                    setAppliedSearch('');
+                                    setActiveCategory({ id: null, name: 'Tất cả' });
+                                    setPage(0);
                                 }}
                                 className="mt-4 text-primary hover:underline"
                             >
@@ -274,6 +304,104 @@ const HomePage = () => {
                         </div>
                     )}
                 </div>
+
+                {/* SERVER-SIDE PAGINATION CONTROLS */}
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-2 md:gap-4 mt-12 w-full">
+                        <button
+                            disabled={page === 0}
+                            onClick={() => {
+                                setPage(page - 1);
+                                window.scrollTo({ top: document.getElementById('top-games')?.offsetTop || 0, behavior: 'smooth' });
+                            }}
+                            className="bg-surface border border-gray-700 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 md:px-6 py-2 rounded-lg font-bold transition-all text-sm md:text-base hidden sm:block"
+                        >
+                            &laquo; Trang Trước
+                        </button>
+                        <button
+                            disabled={page === 0}
+                            onClick={() => {
+                                setPage(page - 1);
+                                window.scrollTo({ top: document.getElementById('top-games')?.offsetTop || 0, behavior: 'smooth' });
+                            }}
+                            className="bg-surface border border-gray-700 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg font-bold transition-all text-sm sm:hidden"
+                        >
+                            &laquo;
+                        </button>
+
+                        <div className="flex items-center gap-1 md:gap-2">
+                            {/* Trang đầu tiên nếu bị ẩn */}
+                            {getPageNumbers()[0] > 0 && (
+                                <>
+                                    <button
+                                        onClick={() => {
+                                            setPage(0);
+                                            window.scrollTo({ top: document.getElementById('top-games')?.offsetTop || 0, behavior: 'smooth' });
+                                        }}
+                                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg font-bold bg-surface border border-gray-700 hover:bg-gray-800 text-gray-400 hover:text-white transition-all text-sm md:text-base"
+                                    >
+                                        1
+                                    </button>
+                                    {getPageNumbers()[0] > 1 && <span className="text-gray-500 font-bold px-1 md:px-2">...</span>}
+                                </>
+                            )}
+
+                            {/* Các trang lân cận */}
+                            {getPageNumbers().map((pageNum) => (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => {
+                                        setPage(pageNum);
+                                        window.scrollTo({ top: document.getElementById('top-games')?.offsetTop || 0, behavior: 'smooth' });
+                                    }}
+                                    className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg font-bold transition-all text-sm md:text-base ${page === pageNum
+                                        ? 'bg-primary text-white shadow-neon-pink'
+                                        : 'bg-surface border border-gray-700 hover:bg-gray-800 text-gray-400 hover:text-white'
+                                        }`}
+                                >
+                                    {pageNum + 1}
+                                </button>
+                            ))}
+
+                            {/* Trang cuối cùng nếu bị ẩn */}
+                            {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
+                                <>
+                                    {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 2 && <span className="text-gray-500 font-bold px-1 md:px-2">...</span>}
+                                    <button
+                                        onClick={() => {
+                                            setPage(totalPages - 1);
+                                            window.scrollTo({ top: document.getElementById('top-games')?.offsetTop || 0, behavior: 'smooth' });
+                                        }}
+                                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg font-bold bg-surface border border-gray-700 hover:bg-gray-800 text-gray-400 hover:text-white transition-all text-sm md:text-base"
+                                    >
+                                        {totalPages}
+                                    </button>
+                                </>
+                            )}
+                        </div>
+
+                        <button
+                            disabled={page >= totalPages - 1}
+                            onClick={() => {
+                                setPage(page + 1);
+                                window.scrollTo({ top: document.getElementById('top-games')?.offsetTop || 0, behavior: 'smooth' });
+                            }}
+                            className="bg-surface border border-gray-700 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 md:px-6 py-2 rounded-lg font-bold transition-all text-sm md:text-base hidden sm:block"
+                        >
+                            Trang Sau &raquo;
+                        </button>
+                        <button
+                            disabled={page >= totalPages - 1}
+                            onClick={() => {
+                                setPage(page + 1);
+                                window.scrollTo({ top: document.getElementById('top-games')?.offsetTop || 0, behavior: 'smooth' });
+                            }}
+                            className="bg-surface border border-gray-700 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg font-bold transition-all text-sm sm:hidden"
+                        >
+                            &raquo;
+                        </button>
+                    </div>
+                )}
             </section>
         </div>
     );

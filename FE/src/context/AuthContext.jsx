@@ -54,6 +54,13 @@ export const AuthProvider = ({ children }) => {
         window.location.href = '/login';
     };
 
+    const updateUser = (newUserData) => {
+        if (!user) return;
+        const updatedUser = { ...user, ...newUserData };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+    };
+
     const register = async (registerData) => {
         try {
             const res = await axiosClient.post('/auth/register', registerData);
@@ -86,7 +93,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, isAdmin }}>
+        <AuthContext.Provider value={{ user, login, logout, register, updateUser, isAuthenticated: !!user, isAdmin }}>
             {children}
         </AuthContext.Provider>
     );

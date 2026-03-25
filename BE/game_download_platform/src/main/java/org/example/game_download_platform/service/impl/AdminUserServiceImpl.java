@@ -32,10 +32,11 @@ public class AdminUserServiceImpl implements IAdminUserService {
     }
 
     @Override
-    public void disableUser(Long id) {
+    public void disableUser(Long id, String reason) {
         User user = userRepository.findById(id)
                 .orElseThrow();
         user.setEnabled(false);
+        user.setLockReason(reason);
         userRepository.save(user);
     }
 
@@ -44,6 +45,7 @@ public class AdminUserServiceImpl implements IAdminUserService {
         User user = userRepository.findById(id)
                 .orElseThrow();
         user.setEnabled(true);
+        user.setLockReason(null);
         userRepository.save(user);
     }
 

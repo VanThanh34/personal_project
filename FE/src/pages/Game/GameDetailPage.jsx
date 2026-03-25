@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosClient from '../../api/axiosClient';
 import { useAuth } from '../../context/AuthContext';
+import FavoriteButton from '../../components/UI/FavoriteButton';
 
 const GameDetailPage = () => {
     const { id } = useParams();
@@ -163,9 +164,14 @@ const GameDetailPage = () => {
                                 </span>
                                 <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
                             </div>
-                            <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6 leading-tight drop-shadow-lg">
-                                {game.title}
-                            </h1>
+                            <div className="flex items-center gap-4 mb-6">
+                                <h1 className="text-4xl md:text-6xl font-display font-bold text-white leading-tight drop-shadow-lg flex-1">
+                                    {game.title}
+                                </h1>
+                                <div className="bg-white/5 backdrop-blur-md p-3 rounded-full border border-white/10 hidden sm:flex items-center justify-center shadow-xl">
+                                    <FavoriteButton gameId={game.id} />
+                                </div>
+                            </div>
 
                             <div className="flex flex-wrap gap-4 mb-8">
                                 <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">

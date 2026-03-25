@@ -5,31 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ae3802d8-4858-4f07-8254-cda5eac369d4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/game_download_platform/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../FE/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../FE/nginx.conf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_download_platform/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/game_download_platform/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/controller/AuthController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/controller/DownloadController.java" beforeDir="false" afterPath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/controller/DownloadController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/entity/DownloadToken.java" beforeDir="false" afterPath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/entity/DownloadToken.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/exception/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/security/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/security/JwtAuthenticationFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/service/impl/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/service/impl/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/service/impl/GameDownloadServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/service/impl/GameDownloadServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_download_platform/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/game_download_platform/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/components/Layout/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/components/Layout/Footer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/components/Layout/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/components/Layout/Navbar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/context/AuthContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/context/AuthContext.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/pages/Admin/AdminDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/pages/Admin/AdminDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/pages/Admin/GameManager.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/pages/Admin/GameManager.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/pages/Auth/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/pages/Auth/LoginPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/pages/Auth/RegisterPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/pages/Auth/RegisterPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/pages/Game/GameDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/pages/Game/GameDetailPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FE/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../FE/src/pages/HomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game_download_platform/src/main/java/org/example/game_download_platform/controller/DownloadController.java.bak" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,6 +61,8 @@
       <workItem from="1770349554835" duration="9000" />
       <workItem from="1772503138922" duration="856000" />
       <workItem from="1772506329483" duration="1626000" />
+      <workItem from="1773730056031" duration="6000" />
+      <workItem from="1773730177203" duration="76000" />
     </task>
     <servers />
   </component>

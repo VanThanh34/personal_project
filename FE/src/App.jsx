@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
+import DialogModal from './components/UI/DialogModal';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
@@ -14,8 +16,25 @@ import UserManager from './pages/Admin/UserManager';
 import CommunityPage from './pages/CommunityPage';
 import TopGamesPage from './pages/Game/TopGamesPage';
 import CategoryPage from './pages/Game/CategoryPage';
+import FavoriteGamesPage from './pages/User/FavoriteGamesPage';
+import ProfilePage from './pages/User/ProfilePage';
 
 function App() {
+  const [lockedData, setLockedData] = useState({ isOpen: false, message: '' });
+
+  useEffect(() => {
+    const handleAuthLocked = (e) => {
+      setLockedData({ isOpen: true, message: e.detail });
+    };
+    window.addEventListener('auth-locked', handleAuthLocked);
+    return () => window.removeEventListener('auth-locked', handleAuthLocked);
+  }, []);
+
+  const handleCloseLockedModal = () => {
+    setLockedData({ isOpen: false, message: '' });
+    window.location.href = '/login'; // Chuyển hướng khi đã nhận được tin buồn
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans selection:bg-blue-500/30 selection:text-blue-200">
       <Navbar />
@@ -30,6 +49,8 @@ function App() {
           <Route path="/categories/:category" element={<CategoryPage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/favorites" element={<FavoriteGamesPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/games" element={<GameManager />} />
@@ -37,6 +58,15 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      
+      {/* Global Lock Modal */}
+      <DialogModal 
+          isOpen={lockedData.isOpen}
+          title="TÀI KHOẢN ĐÃ BỊ KHÓA"
+          message={lockedData.message}
+          type="alert"
+          onClose={handleCloseLockedModal}
+      />
     </div>
   )
 }

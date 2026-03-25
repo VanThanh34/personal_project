@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
 
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/files/**").permitAll()
                         // --- MỞ QUYỀN CHO LINK TẢI FILE (Token lo bảo mật rồi) ---
                         .requestMatchers("/downloads/file").permitAll()
 

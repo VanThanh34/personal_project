@@ -27,8 +27,8 @@ public class AdminUserController {
     }
 
     @PutMapping("/{id}/disable")
-    public void disable(@PathVariable Long id) {
-        adminUserService.disableUser(id);
+    public void disable(@PathVariable Long id, @RequestParam(required = false) String reason) {
+        adminUserService.disableUser(id, reason);
     }
 
     @PutMapping("/{id}/enable")

@@ -15,21 +15,61 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
+        bypass: function (req, res, proxyOptions) {
+          if (req.headers.accept && req.headers.accept.includes('text/html')) {
+            return '/index.html';
+          }
+        }
       },
       '/admin': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
+        bypass: function (req, res, proxyOptions) {
+          if (req.headers.accept && req.headers.accept.includes('text/html')) {
+            return '/index.html';
+          }
+        }
       },
       '/games': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
+        bypass: function (req, res, proxyOptions) {
+          if (req.headers.accept && req.headers.accept.includes('text/html')) {
+            return '/index.html';
+          }
+        }
       },
       '/downloads': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
+        bypass: function (req, res, proxyOptions) {
+          if (req.headers.accept && req.headers.accept.includes('text/html')) {
+            return '/index.html';
+          }
+        }
+      },
+      '/user': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+        bypass: function (req, res, proxyOptions) {
+          if (req.headers.accept && req.headers.accept.includes('text/html')) {
+            return '/index.html';
+          }
+        }
+      },
+      '/files': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+        bypass: function (req, res, proxyOptions) {
+          if (req.headers.accept && req.headers.accept.includes('text/html')) {
+            return '/index.html';
+          }
+        }
       }
     }
   }

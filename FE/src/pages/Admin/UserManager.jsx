@@ -1,9 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../../api/axiosClient';
+import DialogModal from '../../components/UI/DialogModal';
 
 const UserManager = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [dialogConfig, setDialogConfig] = useState({ isOpen: false, title: '', message: '', type: 'alert', onConfirm: null, showInput: false, inputPlaceholder: '' });
+
+    const showDialog = (title, message, type = 'alert', onConfirm = null, showInput = false, inputPlaceholder = '') => {
+        setDialogConfig({ isOpen: true, title, message, type, onConfirm, showInput, inputPlaceholder });
+    };
+
+    const closeDialog = () => {
+        setDialogConfig(prev => ({ ...prev, isOpen: false }));
+    };
 
     const fetchUsers = async () => {
         try {
@@ -21,23 +31,29 @@ const UserManager = () => {
     useEffect(() => { fetchUsers(); }, []);
 
     // Hàm Khóa/Mở khóa User
-    const toggleStatus = async (user) => {
+    const toggleStatus = (user) => {
         const action = user.enabled ? 'disable' : 'enable';
-        const confirmMsg = user.enabled
-            ? `Bạn có muốn KHÓA tài khoản ${user.username}?`
-            : `Bạn có muốn MỞ KHÓA tài khoản ${user.username}?`;
+        const isLocking = user.enabled;
+        
+        const confirmMsg = isLocking
+            ? `CẢNH BÁO: Kéo theo toàn bộ phiên đăng nhập của User này sẽ bị hủy. Hãy nhập lý do khóa tài khoản ${user.username}:`
+            : `Bạn có muốn MỞ KHÓA tài khoản ${user.username} để cấp lại quyền truy cập không?`;
 
-        if (window.confirm(confirmMsg)) {
+        showDialog('Xác Nhận Hành Động', confirmMsg, 'confirm', async (reason) => {
             try {
-                // Gọi API Disable/Enable (Khớp AdminUserController.java)
-                await axiosClient.put(`/admin/users/${user.id}/${action}`);
-                alert("Cập nhật trạng thái thành công!");
+                // Gọi API Disable/Enable
+                await axiosClient.put(`/admin/users/${user.id}/${action}`, null, {
+                    params: { reason: isLocking ? reason : undefined }
+                });
                 fetchUsers(); // Load lại
+                closeDialog();
+                setTimeout(() => showDialog('Thành Công', 'Cập nhật trạng thái người dùng thành công!', 'alert'), 300);
             } catch (error) {
-                alert("Lỗi khi cập nhật trạng thái!");
+                closeDialog();
+                setTimeout(() => showDialog('Lỗi', 'Lỗi khi cập nhật trạng thái người dùng!', 'alert'), 300);
             }
-        }
-    }
+        }, isLocking, 'Nhập lý do khóa tài khoản (tùy chọn)...');
+    };
 
     return (
         <div className="p-6 pt-24 min-h-screen bg-background text-white animate-fade-in">
@@ -105,6 +121,18 @@ const UserManager = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Custom Dialog Modal */}
+            <DialogModal 
+                isOpen={dialogConfig.isOpen}
+                title={dialogConfig.title}
+                message={dialogConfig.message}
+                type={dialogConfig.type}
+                onConfirm={dialogConfig.onConfirm}
+                onClose={closeDialog}
+                showInput={dialogConfig.showInput}
+                inputPlaceholder={dialogConfig.inputPlaceholder}
+            />
         </div>
     );
 };

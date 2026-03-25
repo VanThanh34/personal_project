@@ -52,6 +52,10 @@ public class AuthService {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFullName(request.getFullName());
+        if (request.getDob() != null) {
+            user.setDob(request.getDob());
+        }
         user.setEnabled(false); // Chưa kích hoạt
         user.setRoles(Set.of(userRole));
 

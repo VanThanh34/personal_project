@@ -1,14 +1,11 @@
 package org.example.game_download_platform.dto.request;
 
 import lombok.Getter;
+
 import java.time.LocalDate;
 
 @Getter
-public class RegisterRequest {
-    private String username;
-    private String email;
-    private String password;
+public class UpdateProfileRequest {
     private String fullName;
     private LocalDate dob;
-
 }

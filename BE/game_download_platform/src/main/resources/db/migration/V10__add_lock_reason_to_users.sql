@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN lock_reason VARCHAR(255);

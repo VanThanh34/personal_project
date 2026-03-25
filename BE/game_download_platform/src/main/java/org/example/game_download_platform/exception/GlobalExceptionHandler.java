@@ -28,6 +28,14 @@ public class GlobalExceptionHandler {
                 return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
+        @ExceptionHandler(org.springframework.security.authentication.DisabledException.class)
+        public ResponseEntity<Map<String, String>> handleDisabledException(org.springframework.security.authentication.DisabledException ex) {
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "User Disabled");
+                response.put("message", ex.getMessage());
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
         @ExceptionHandler(Exception.class)
         public ResponseEntity<Map<String, String>> handleException(Exception ex) {
                 Map<String, String> response = new HashMap<>();

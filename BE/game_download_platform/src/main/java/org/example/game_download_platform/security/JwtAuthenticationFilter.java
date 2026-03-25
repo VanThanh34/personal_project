@@ -59,6 +59,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             }
+        } catch (org.springframework.security.authentication.DisabledException e) {
+            // NẾU TÀI KHOẢN BỊ KHÓA TRONG KHI ĐANG DÙNG
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"message\": \"" + e.getMessage() + "\", \"error\": \"User Disabled\"}");
+            return;
         } catch (Exception e) {
             // Log lỗi để debug (ví dụ: Token hết hạn, sai chữ ký...)
             System.err.println("⚠️ JWT Filter Error: " + e.getMessage());

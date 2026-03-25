@@ -25,7 +25,7 @@ public class DownloadController {
 
     @PostMapping("/generate/{gameId}")
     public ResponseEntity<String> generateLink(@PathVariable Long gameId,
-                                               @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -39,23 +39,26 @@ public class DownloadController {
         // Lấy kết quả (có thể là String hoặc Resource)
         Object result = downloadService.downloadFile(token);
 
-        // CASE 1: Xử lý Resource (Cả Local File và Online Proxy đều trả về Resource)
-        if (result instanceof Resource) {
-            Resource resource = (Resource) result;
-            String filename = resource.getFilename();
-            if (filename == null) filename = "game_download"; // Fallback name
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                    // Thêm header chống cache để chắc chắn Token luôn được check
+        // CASE 1: Nếu là Link Online (String) -> Redirect
+        if (result instanceof String) {
+            String redirectUrl = (String) result;
+            return ResponseEntity.status(HttpStatus.FOUND) // Mã 302 Found
                     .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.PRAGMA, "no-cache")
                     .header(HttpHeaders.EXPIRES, "0")
+                    .location(URI.create(redirectUrl)) // Chuyển hướng
+                    .build();
+        }
+
+        // CASE 2: Nếu là File Local (Resource) -> Tải về
+        if (result instanceof Resource) {
+            Resource resource = (Resource) result;
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
         }
 
-        // CASE 2: Dự phòng nếu code service trả về cái gì đó lạ
-        return ResponseEntity.badRequest().body("Lỗi xử lý file tải xuống");
+        return ResponseEntity.badRequest().body("Lỗi không xác định");
     }
 }

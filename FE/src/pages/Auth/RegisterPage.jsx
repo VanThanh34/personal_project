@@ -7,7 +7,8 @@ const RegisterPage = () => {
         username: '',
         email: '',
         password: '',
-        fullName: ''
+        fullName: '',
+        dob: ''
     });
 
     // State xử lý UI
@@ -111,6 +112,21 @@ const RegisterPage = () => {
                             placeholder="Địa chỉ Email"
                             required
                         />
+                    </div>
+
+                    {/* DOB */}
+                    <div>
+                        <div className="relative">
+                            <span className="absolute -top-2 left-4 px-1 bg-surface/60 text-xs font-bold text-gray-400">Ngày sinh</span>
+                            <input
+                                type="date"
+                                name="dob"
+                                value={formData.dob}
+                                onChange={handleChange}
+                                className="w-full bg-background/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all placeholder-gray-600 font-bold [color-scheme:dark]"
+                                required
+                            />
+                        </div>
                     </div>
 
                     {/* Password */}

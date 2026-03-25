@@ -29,10 +29,19 @@ axiosClient.interceptors.response.use(
     (error) => {
         // Handle 401 Unauthorized
         if (error.response && error.response.status === 401) {
-            // Optional: Logout user or redirect to login
+            const isDisabled = error.response.data?.error === 'User Disabled';
+            const msg = error.response.data?.message;
+            
+            if (isDisabled) {
+                // Đẩy event báo hiệu tài khoản bị khóa
+                window.dispatchEvent(new CustomEvent('auth-locked', { detail: msg }));
+            } else {
+                // Redirect standard 401
+                window.location.href = '/login';
+            }
+            
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            // window.location.href = '/login';
         }
         return Promise.reject(error);
     }

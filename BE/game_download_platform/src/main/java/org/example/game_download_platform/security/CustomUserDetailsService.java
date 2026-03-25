@@ -22,6 +22,12 @@ public class CustomUserDetailsService implements UserDetailsService {
                         new UsernameNotFoundException("Không tìm thấy ngưòi dùng: " + username)
                 );
 
+        if (!user.isEnabled()) {
+            throw new org.springframework.security.authentication.DisabledException(
+                user.getLockReason() != null ? user.getLockReason() : "Vi phạm chính sách cộng đồng."
+            );
+        }
+
         return new CustomUserDetails(user);
     }
 }

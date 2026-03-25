@@ -10,7 +10,7 @@ public interface IAdminUserService {
 
     AdminUserResponse getUserById(Long id);
 
-    void disableUser(Long id);
+    void disableUser(Long id, String reason);
 
     void enableUser(Long id);
 
